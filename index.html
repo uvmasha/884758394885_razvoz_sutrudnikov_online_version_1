@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🥐 Remy Kitchen Bakery — Генератор развоза</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cream: #FFF8F0;
+            --cream-dark: #F5E6D3;
+            --caramel: #D4A574;
+            --caramel-dark: #B8956A;
+            --chocolate: #4A3728;
+            --chocolate-light: #6B5344;
+            --gold: #C9A961;
+            --gold-light: #E5C585;
+            --white: #FFFFFF;
+            --gray-light: #F9F7F5;
+            --gray: #E8E4E1;
+            --text: #2D2420;
+            --text-light: #6B5344;
+            --success: #7CB342;
+            --success-dark: #558B2F;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, var(--cream-dark) 100%);
+            margin: 0;
+            padding: 20px;
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px 20px;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(74, 55, 40, 0.08);
+            border: 2px solid var(--caramel);
+        }
+        .header h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            color: var(--chocolate);
+            font-size: 2.5em;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+        }
+        .header .subtitle {
+            color: var(--text-light);
+            font-size: 1.1em;
+            font-weight: 300;
+        }
+        .header .logo { font-size: 3em; margin-bottom: 10px; }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        @media (max-width: 1024px) { .container { grid-template-columns: 1fr; } }
+        .panel {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(74, 55, 40, 0.08);
+            border: 2px solid var(--caramel);
+        }
+        .panel h2 {
+            font-family: 'Playfair Display', Georgia, serif;
+            color: var(--chocolate);
+            font-size: 1.8em;
+            margin: 0 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .controls {
+            background: var(--gray-light);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid var(--gray);
+        }
+        .date-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .date-row label {
+            font-weight: 600;
+            color: var(--chocolate);
+            font-size: 1.1em;
+        }
+        .date-input {
+            padding: 10px 15px;
+            border: 2px solid var(--caramel);
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: var(--white);
+            cursor: pointer;
+        }
+        .date-input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.2);
+        }
+        .filter-section { margin-top: 15px; }
+        .filter-label {
+            font-weight: 600;
+            color: var(--chocolate);
+            margin-bottom: 12px;
+            display: block;
+        }
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .filter-btn {
+            padding: 10px 18px;
+            border: 2px solid var(--caramel);
+            background: var(--white);
+            color: var(--chocolate);
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+        .filter-btn:hover {
+            background: var(--cream);
+            border-color: var(--gold);
+        }
+        .filter-btn.active {
+            background: var(--caramel);
+            color: var(--white);
+            border-color: var(--caramel);
+        }
+        .role-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: var(--gray-light);
+            border-radius: 12px;
+            border-left: 4px solid var(--caramel);
+        }
+        .role-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            color: var(--chocolate);
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .employee {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            background: var(--white);
+            border: 1px solid var(--gray);
+            transition: all 0.3s ease;
+        }
+        .employee:hover {
+            border-color: var(--caramel);
+            box-shadow: 0 2px 8px rgba(212, 165, 116, 0.2);
+        }
+        .employee input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+            accent-color: var(--caramel);
+        }
+        .employee-info { flex: 1; }
+        .employee-name {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .employee-priority {
+            font-size: 0.85em;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+        .priority-bus {
+            background: rgba(124, 179, 66, 0.15);
+            color: var(--success-dark);
+        }
+        .priority-taxi {
+            background: rgba(201, 169, 97, 0.15);
+            color: var(--caramel-dark);
+        }
+        .controls-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .shift-select, .transport-select {
+            padding: 8px 12px;
+            border: 2px solid var(--gray);
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .shift-select:focus, .transport-select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.2);
+        }
+        .transport-select.taxi-mode {
+            border-color: var(--gold);
+            background: rgba(201, 169, 97, 0.05);
+        }
+        .transport-select.bus-mode {
+            border-color: var(--success);
+            background: rgba(124, 179, 66, 0.05);
+        }
+        .generate-btn {
+            background: linear-gradient(135deg, var(--caramel) 0%, var(--caramel-dark) 100%);
+            color: var(--white);
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            margin-top: 25px;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 165, 116, 0.3);
+        }
+        .generate-btn:hover {
+            background: linear-gradient(135deg, var(--caramel-dark) 0%, var(--chocolate-light) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 165, 116, 0.4);
+        }
+        .output-area { margin-top: 20px; }
+        textarea {
+            width: 100%;
+            height: 500px;
+            padding: 20px;
+            border: 2px solid var(--gray);
+            border-radius: 12px;
+            font-family: 'Inter', monospace;
+            font-size: 0.95em;
+            resize: vertical;
+            background: var(--gray-light);
+            color: var(--text);
+            line-height: 1.8;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.2);
+        }
+        .copy-btn {
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+            color: var(--white);
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(124, 179, 66, 0.3);
+        }
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 179, 66, 0.4);
+        }
+        .stats {
+            background: var(--cream);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--caramel);
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .stat-item { text-align: center; }
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--chocolate);
+            font-family: 'Playfair Display', serif;
+        }
+        .stat-label {
+            font-size: 0.85em;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🥐🚐</div>
+        <h1>Remy Kitchen Bakery</h1>
+        <div class="subtitle">Генератор развоза сотрудников</div>
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <h2>👥 Сотрудники</h2>
+            <div class="controls">
+                <div class="date-row">
+                    <label for="dateInput">📅 Дата развоза:</label>
+                    <input type="date" id="dateInput" class="date-input">
+                </div>
+                <div class="filter-section">
+                    <label class="filter-label">🔍 Фильтр по ролям:</label>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-role="all">Все</button>
+                        <button class="filter-btn" data-role="Менеджеры">👔 Менеджеры</button>
+                        <button class="filter-btn" data-role="Официанты">🍽️ Официанты</button>
+                        <button class="filter-btn" data-role="Хостес">🌸 Хостес</button>
+                        <button class="filter-btn" data-role="Бармены">🍸 Бармены</button>
+                        <button class="filter-btn" data-role="МОП">🧹 МОП</button>
+                        <button class="filter-btn" data-role="Повара">👨‍🍳 Повара</button>
+                    </div>
+                </div>
+            </div>
+            <div id="employeesList"></div>
+            <button class="generate-btn" onclick="generateSchedule()">✨ Сгенерировать развоз</button>
+        </div>
+
+        <div class="panel">
+            <h2>📝 Результат</h2>
+            <div class="stats" id="statsPanel" style="display: none;">
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalEmployees">0</div>
+                        <div class="stat-label">👤 Сотрудников</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalBus">0</div>
+                        <div class="stat-label">🚌 Маршрутка</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalTaxi">0</div>
+                        <div class="stat-label">🚕 Такси</div>
+                    </div>
+                </div>
+            </div>
+            <div class="output-area">
+                <textarea id="outputText" readonly placeholder="Выберите сотрудников и нажмите «Сгенерировать развоз»..."></textarea>
+                <button class="copy-btn" onclick="copyToClipboard()">📋 Копировать</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const employees = [
+            { name: "Лада", role: "Менеджеры", location: "Жаворонки", defaultType: "маршрутка" },
+            { name: "Алина", role: "Менеджеры", location: "Горки 10", defaultType: "маршрутка" },
+            { name: "Леша", role: "Официанты", location: "Кунцевская", defaultType: "такси" },
+            { name: "Иван", role: "Официанты", location: "Горки 2", defaultType: "маршрутка" },
+            { name: "Вова", role: "Официанты", location: "Жаворонки", defaultType: "маршрутка" },
+            { name: "Никита", role: "Официанты", location: "Назарьево", defaultType: "маршрутка" },
+            { name: "Артем", role: "Официанты", location: "Жаворонки", defaultType: "маршрутка" },
+            { name: "Саша", role: "Официанты", location: "Кунцевская", defaultType: "такси" },
+            { name: "Софья", role: "Официанты", location: "Кунцевская", defaultType: "такси" },
+            { name: "Коля", role: "Официанты", location: "Назарьево", defaultType: "маршрутка" },
+            { name: "Ваня", role: "Официанты", location: "Кунцевская", defaultType: "такси" },
+            { name: "Вероника", role: "Официанты", location: "Кунцевская", defaultType: "такси" },
+            { name: "Виталий", role: "Официанты", location: "Кунцевская", defaultType: "такси" },
+            { name: "Кристина", role: "Официанты", location: "Кунцевская", defaultType: "такси" },
+            { name: "Данил", role: "Официанты", location: "Кунцевская", defaultType: "такси" },
+            { name: "Святослав", role: "Официанты", location: "Кунцевская", defaultType: "такси" },
+            { name: "Лейла", role: "Хостес", location: "Горки 10", defaultType: "маршрутка" },
+            { name: "Артем (бармен)", role: "Бармены", location: "Горки 10", defaultType: "маршрутка", rawName: "Артем" },
+            { name: "Матвей", role: "Бармены", location: "Горки 10", defaultType: "маршрутка" },
+            { name: "Олег", role: "Бармены", location: "Горки 10", defaultType: "маршрутка" },
+            { name: "Сергей", role: "Бармены", location: "Жаворонки", defaultType: "маршрутка" },
+            { name: "Яков", role: "Бармены", location: "Кунцевская", defaultType: "такси" },
+            { name: "Армен", role: "Бармены", location: "Горки 10", defaultType: "маршрутка" },
+            { name: "Назира", role: "МОП", location: "Горки 10", defaultType: "маршрутка" },
+            { name: "Сабрина", role: "МОП", location: "Горки 10", defaultType: "маршрутка" },
+            { name: "Азиза", role: "МОП", location: "Успенское", defaultType: "маршрутка" },
+            { name: "Сардор (МОП)", role: "МОП", location: "Назарьево", defaultType: "маршрутка", rawName: "Сардор" },
+            { name: "Аман", role: "Повара", location: "Назарьево", defaultType: "маршрутка" },
+            { name: "Иса", role: "Повара", location: "Назарьево", defaultType: "маршрутка" },
+            { name: "Салим", role: "Повара", location: "Кунцевская", defaultType: "такси" },
+            { name: "Ибрагим", role: "Повара", location: "Назарьево", defaultType: "маршрутка" },
+            { name: "Комил", role: "Повара", location: "Назарьево", defaultType: "маршрутка" },
+            { name: "Сардор (повар)", role: "Повара", location: "Назарьево", defaultType: "маршрутка", rawName: "Сардор" },
+            { name: "Микаел", role: "Повара", location: "Кунцевская", defaultType: "такси" },
+            { name: "Фирдавс", role: "Повара", location: "Кунцевская", defaultType: "такси" },
+            { name: "Буна", role: "Повара", location: "Горки 10", defaultType: "маршрутка" },
+            { name: "Жасур", role: "Повара", location: "Назарьево", defaultType: "маршрутка" },
+            { name: "Зафар", role: "Повара", location: "Жаворонки", defaultType: "маршрутка" },
+            { name: "Ойкиз", role: "Повара", location: "Горки 10", defaultType: "маршрутка" },
+            { name: "Оля", role: "Повара", location: "Горки 10", defaultType: "маршрутка" }
+        ];
+
+        let currentFilter = "all";
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            document.getElementById('dateInput').value = today.toISOString().split('T')[0];
+            renderEmployees();
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.role;
+                    renderEmployees();
+                });
+            });
+        });
+
+        function renderEmployees() {
+            const container = document.getElementById('employeesList');
+            container.innerHTML = '';
+            const roles = ["Менеджеры", "Официанты", "Хостес", "Бармены", "МОП", "Повара"];
+            const roleIcons = {"Менеджеры": "👔", "Официанты": "🍽️", "Хостес": "🌸", "Бармены": "🍸", "МОП": "🧹", "Повара": "👨‍🍳"};
+
+            roles.forEach(role => {
+                if (currentFilter !== "all" && currentFilter !== role) return;
+                const roleEmployees = employees.filter(e => e.role === role);
+                if (roleEmployees.length === 0) return;
+
+                const roleSection = document.createElement('div');
+                roleSection.className = 'role-section';
+                const roleTitle = document.createElement('div');
+                roleTitle.className = 'role-title';
+                roleTitle.textContent = `${roleIcons[role]} ${role}`;
+                roleSection.appendChild(roleTitle);
+
+                roleEmployees.forEach(emp => {
+                    const empDiv = document.createElement('div');
+                    empDiv.className = 'employee';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `emp_${emp.name.replace(/\s+/g, '_')}`;
+                    checkbox.dataset.name = emp.rawName || emp.name;
+                    checkbox.dataset.role = emp.role;
+                    checkbox.dataset.location = emp.location;
+                    checkbox.dataset.defaultType = emp.defaultType;
+
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = 'employee-info';
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'employee-name';
+                    nameDiv.textContent = emp.name;
+                    const priorityDiv = document.createElement('div');
+                    priorityDiv.className = 'employee-priority';
+                    const isTaxiPriority = emp.defaultType === 'такси';
+                    priorityDiv.innerHTML = `<span class="priority-badge ${isTaxiPriority ? 'priority-taxi' : 'priority-bus'}">${isTaxiPriority ? '🚕' : '🚌'} ${isTaxiPriority ? 'Такси' : 'Маршрутка'}</span><span style="margin-left: 8px; opacity: 0.6;">${getLocationIcon(emp.location)} ${emp.location}</span>`;
+                    infoDiv.appendChild(nameDiv);
+                    infoDiv.appendChild(priorityDiv);
+
+                    const controlsRow = document.createElement('div');
+                    controlsRow.className = 'controls-row';
+                    const shiftSelect = document.createElement('select');
+                    shiftSelect.className = 'shift-select';
+                    shiftSelect.innerHTML = '<option value="9">⏰ с 9</option><option value="11">⏰ с 11</option>';
+                    const transportSelect = document.createElement('select');
+                    transportSelect.className = `transport-select ${emp.defaultType === 'такси' ? 'taxi-mode' : 'bus-mode'}`;
+                    transportSelect.innerHTML = '<option value="маршрутка" ' + (emp.defaultType === 'маршрутка' ? 'selected' : '') + '>🚌 Маршрутка</option><option value="такси" ' + (emp.defaultType === 'такси' ? 'selected' : '') + '>🚕 Такси</option>';
+                    controlsRow.appendChild(shiftSelect);
+                    controlsRow.appendChild(transportSelect);
+
+                    empDiv.appendChild(checkbox);
+                    empDiv.appendChild(infoDiv);
+                    empDiv.appendChild(controlsRow);
+                    roleSection.appendChild(empDiv);
+                });
+                container.appendChild(roleSection);
+            });
+        }
+
+        function getLocationIcon(location) {
+            const icons = {"Горки 2": "🏡", "Жаворонки": "🌾", "Назарьево": "🏘️", "Горки 10": "🏢", "Успенское": "🌳", "Кунцевская": "🚇"};
+            return icons[location] || "📍";
+        }
+
+        function generateSchedule() {
+            const dateInput = document.getElementById('dateInput').value;
+            const date = new Date(dateInput);
+            const dateStr = date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+
+            const selected = [];
+            document.querySelectorAll('.employee input[type="checkbox"]:checked').forEach(cb => {
+                const shift = cb.parentElement.querySelector('.shift-select').value;
+                const transport = cb.parentElement.querySelector('.transport-select').value;
+                selected.push({ name: cb.dataset.name, role: cb.dataset.role, location: cb.dataset.location, type: transport, shift: shift });
+            });
+
+            if (selected.length === 0) {
+                document.getElementById('outputText').value = 'Выберите сотрудников для развоза';
+                updateStats(0, 0, 0);
+                return;
+            }
+
+            const taxiCount = selected.filter(e => e.type === 'такси').length;
+            const busCount = selected.filter(e => e.type === 'маршрутка').length;
+            updateStats(selected.length, busCount, taxiCount);
+            document.getElementById('statsPanel').style.display = 'block';
+
+            let output = `Развоз ${dateStr}\n\n`;
+            output += 'Утро:\n\n';
+
+            const morningBus9 = selected.filter(e => e.type === 'маршрутка' && e.shift === '9');
+            const morningLocations9 = {};
+            morningBus9.forEach(e => { if (!morningLocations9[e.location]) morningLocations9[e.location] = []; morningLocations9[e.location].push(e.name); });
+            const morningOrder9 = {'Горки 2': '8:00', 'Жаворонки': '8:20', 'Назарьево': '8:30', 'Горки 10': '8:50'};
+            Object.keys(morningOrder9).forEach(loc => { if (morningLocations9[loc]) output += `${morningOrder9[loc]}\n${loc}\n(${morningLocations9[loc].join(', ')})\n\n`; });
+
+            const morningTaxi9 = selected.filter(e => e.type === 'такси' && e.shift === '9');
+            if (morningTaxi9.length > 0) output += 'Такси (к 9:00)\n(' + morningTaxi9.map(e => e.name).join(', ') + ')\n\n';
+
+            output += '_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n';
+
+            const morningTaxi11 = selected.filter(e => e.type === 'такси' && e.shift === '11');
+            if (morningTaxi11.length > 0) output += 'Такси (к 11:00)\n10:00 Кунцевская\n(' + morningTaxi11.map(e => e.name).join(', ') + ')\n\n';
+
+            const morningBus11 = selected.filter(e => e.type === 'маршрутка' && e.shift === '11');
+            const morningLocations11 = {};
+            morningBus11.forEach(e => { if (!morningLocations11[e.location]) morningLocations11[e.location] = []; morningLocations11[e.location].push(e.name); });
+            const morningOrder11 = {'Успенское': '10:20', 'Назарьево': '10:40', 'Горки 10': '10:50'};
+            Object.keys(morningOrder11).forEach(loc => { if (morningLocations11[loc]) output += `${morningOrder11[loc]}\n${loc}\n(${morningLocations11[loc].join(', ')})\n\n`; });
+
+            output += '_____________________\n';
+            output += '\nВечер:\n\n';
+
+            const eveningBus21 = selected.filter(e => e.type === 'маршрутка' && e.shift === '9');
+            const eveningLocations21 = {};
+            eveningBus21.forEach(e => { if (!eveningLocations21[e.location]) eveningLocations21[e.location] = []; eveningLocations21[e.location].push(e.name); });
+            let route21 = [];
+            ['Горки 10', 'Назарьево', 'Жаворонки', 'Горки 2', 'Успенское'].forEach(loc => { if (eveningLocations21[loc]) route21.push(loc === 'Горки 10' ? 'Горки 10' : loc === 'Горки 2' ? 'Горки 2' : loc); });
+            if (route21.length > 0) { output += `21:00\n${route21.join('-')}\n(` + Object.values(eveningLocations21).flat().join(', ') + ')\n\n'; }
+
+            const eveningBus23 = selected.filter(e => e.type === 'маршрутка' && e.shift === '11');
+            const eveningLocations23 = {};
+            eveningBus23.forEach(e => { if (!eveningLocations23[e.location]) eveningLocations23[e.location] = []; eveningLocations23[e.location].push(e.name); });
+            let route23 = [];
+            ['Горки 10', 'Назарьево', 'Успенское', 'Жаворонки', 'Горки 2'].forEach(loc => { if (eveningLocations23[loc]) route23.push(loc === 'Горки 10' ? 'Горки 10' : loc === 'Горки 2' ? 'Горки 2' : loc); });
+            if (route23.length > 0) { output += `23:00\n${route23.join('-')}\n(` + Object.values(eveningLocations23).flat().join(', ') + ')\n\n'; }
+
+            const eveningTaxi9 = selected.filter(e => e.type === 'такси' && e.shift === '9');
+            const eveningTaxi11 = selected.filter(e => e.type === 'такси' && e.shift === '11');
+            if (eveningTaxi9.length > 0 || eveningTaxi11.length > 0) {
+                output += 'Такси\n';
+                if (eveningTaxi9.length > 0) output += `(к 21:00) ${eveningTaxi9.map(e => e.name).join(', ')}\n`;
+                if (eveningTaxi11.length > 0) output += `(к 23:00) ${eveningTaxi11.map(e => e.name).join(', ')}\n`;
+            }
+
+            document.getElementById('outputText').value = output;
+        }
+
+        function updateStats(total, bus, taxi) {
+            document.getElementById('totalEmployees').textContent = total;
+            document.getElementById('totalBus').textContent = bus;
+            document.getElementById('totalTaxi').textContent = taxi;
+        }
+
+        function copyToClipboard() {
+            const textarea = document.getElementById('outputText');
+            textarea.select();
+            document.execCommand('copy');
+            const btn = document.querySelector('.copy-btn');
+            const originalText = btn.textContent;
+            btn.textContent = '✅ Скопировано!';
+            setTimeout(() => { btn.textContent = originalText; }, 2000);
+        }
+    </script>
+</body>
+</html>
